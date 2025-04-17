@@ -23,16 +23,21 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    //signup만 리펙토링 할 것.
+    //passwordEncoder의 encode()동작이 불필요하게 일어나면 x
     @Transactional
     public SignupResponse signup(SignupRequest signupRequest) {
-
-        String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
-
-        UserRole userRole = UserRole.of(signupRequest.getUserRole());
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new InvalidRequestException("이미 존재하는 이메일입니다.");
         }
+
+        UserRole userRole = UserRole.of(signupRequest.getUserRole());
+        if (userRole == null) {
+            throw new InvalidRequestException("잘못된 권한입니다.");
+        }
+
+        String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
 
         User newUser = new User(
                 signupRequest.getEmail(),
