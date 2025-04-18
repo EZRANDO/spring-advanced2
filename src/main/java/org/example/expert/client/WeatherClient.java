@@ -4,6 +4,7 @@ import org.example.expert.client.dto.WeatherDto;
 import org.example.expert.domain.common.exception.ServerException;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -26,37 +27,54 @@ public class WeatherClient {
         ResponseEntity<WeatherDto[]> responseEntity =
                 restTemplate.getForEntity(buildWeatherApiUri(), WeatherDto[].class);
 
+//        WeatherDto[] weatherArray = responseEntity.getBody();
+//        if (!HttpStatus.OK.equals(responseEntity.getStatusCode())) {
+//            throw new ServerException("날씨 데이터를 가져오는데 실패했습니다. 상태 코드: " + responseEntity.getStatusCode());
+//        } else {
+//            if (weatherArray == null || weatherArray.length == 0) {
+//                throw new ServerException("날씨 데이터가 없습니다.");
+//            }
+//        }
+
+        //순서는 왜 바꿨냐면, 날씨 데이터가 일단 있는지 확인하는게 먼저고 있다면, 데이터를 가져오는 로직으로 구현되어야 하니까.
+        //responseEntity.getStatusCode() 제거하는게 낫지 않나.
+        //코드가 이상한 것 같아서 생각을 해봤는데, 상태코드가 200인지 확인하는건 비즈니스 로직만 다루는게 아니니 어색하지 않나.
+        
+        HttpStatusCode status = responseEntity.getStatusCode();
         WeatherDto[] weatherArray = responseEntity.getBody();
-        if (!HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-            throw new ServerException("날씨 데이터를 가져오는데 실패했습니다. 상태 코드: " + responseEntity.getStatusCode());
-        } else {
             if (weatherArray == null || weatherArray.length == 0) {
                 throw new ServerException("날씨 데이터가 없습니다.");
             }
-        }
-
-        String today = getCurrentDate();
-
-        for (WeatherDto weatherDto : weatherArray) {
-            if (today.equals(weatherDto.getDate())) {
-                return weatherDto.getWeather();
+        if (!HttpStatus.OK.equals(status)) {
+            throw new ServerException("날씨 데이터를 가져오는데 실패했습니다. 상태 코드: " + status);
             }
+
+
+        
+
+
+            String today = getCurrentDate();
+
+            for (WeatherDto weatherDto : weatherArray) {
+                if (today.equals(weatherDto.getDate())) {
+                    return weatherDto.getWeather();
+                }
+            }
+
+            throw new ServerException("오늘에 해당하는 날씨 데이터를 찾을 수 없습니다.");
         }
 
-        throw new ServerException("오늘에 해당하는 날씨 데이터를 찾을 수 없습니다.");
-    }
+        private URI buildWeatherApiUri () {
+            return UriComponentsBuilder
+                    .fromUriString("https://f-api.github.io")
+                    .path("/f-api/weather.json")
+                    .encode()
+                    .build()
+                    .toUri();
+        }
 
-    private URI buildWeatherApiUri() {
-        return UriComponentsBuilder
-                .fromUriString("https://f-api.github.io")
-                .path("/f-api/weather.json")
-                .encode()
-                .build()
-                .toUri();
+        private String getCurrentDate () {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
+            return LocalDate.now().format(formatter);
+        }
     }
-
-    private String getCurrentDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
-        return LocalDate.now().format(formatter);
-    }
-}
