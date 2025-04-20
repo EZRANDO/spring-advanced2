@@ -35,8 +35,12 @@ public class ManagerService {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
-        if (!ObjectUtils.nullSafeEquals(user.getId(), todo.getUser().getId())) {
-            throw new InvalidRequestException("담당자를 등록하려고 하는 유저가 일정을 만든 유저가 유효하지 않습니다.");
+        //두 객체를 비교해서 값이 같으면 true, 다르면 false
+        //둘다 null이면 true, 둘 중 하나만 null이면 false
+        //setField를 통해 value가 null일 때 null이 나오는 것도 정상이야!!!
+        //todo에서 가져온 User가 null인 상황이라면, null예외 터짐
+        if (todo.getUser() == null || ObjectUtils.nullSafeEquals(user.getId(), todo.getUser().getId())) {
+            throw new InvalidRequestException("해당 일정을 생성한 유저만 담당자를 등록할 수 있습니다.");
         }
 
         User managerUser = userRepository.findById(managerSaveRequest.getManagerUserId())
