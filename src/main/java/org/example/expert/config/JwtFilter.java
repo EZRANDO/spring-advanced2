@@ -37,6 +37,12 @@ public class JwtFilter implements Filter {
             return;
         }
 
+        if (url.startsWith("/admin") || url.startsWith("/test-token")) {
+            chain.doFilter(request, response);
+            System.out.println("🌐 요청 URI: " + url);
+            return;
+        }
+
         String bearerJwt = httpRequest.getHeader("Authorization");
 
         if (bearerJwt == null) {
