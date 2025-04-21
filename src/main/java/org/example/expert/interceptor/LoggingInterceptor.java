@@ -2,6 +2,7 @@ package org.example.expert.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.lang.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -13,11 +14,9 @@ import java.time.LocalDateTime;
 @Component
 public class LoggingInterceptor implements HandlerInterceptor {
 
-    //로그를 찍기 위한 객체를 생성. 실제로는 logger.info(), logger.warn()방식 로그 출력 가능.
-    //private static final Logger logger = LoggerFactory.getLogger(LoggingInterceptor.class);
     //HttpServletRequest사전처리
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response,@NonNull Object handler) {
         //인증하기 위해서 Header를 가져와야함. uri와 role,time
         String time = LocalDateTime.now().toString();
         String requestURI = request.getRequestURI();
@@ -27,11 +26,9 @@ public class LoggingInterceptor implements HandlerInterceptor {
         if(!"ADMIN".equals(role)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             log.warn("{} is not allowed to access this resource", role);
-            log.error("ewrwer");
             return false;
         }
         //요청시각과 URL로깅
-        System.out.println("preHandle 실행됨");
         log.info("time={}, requestURI={}, role={}", time, requestURI, role);
         return true;
     }
