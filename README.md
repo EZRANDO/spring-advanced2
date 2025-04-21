@@ -30,7 +30,7 @@
 - `NullPointerException`or `ServerException`이 아닌 `InvalidRequestException`을 실제 예외로 사용
 - 메서드명도 예외에 맞춰 수정
 
-### 📌� 3. 서비스 로직 보완
+### 📌 3. 서비스 로직 보완
 - `Todo`에 연관된 `User`가 null인 경우 예외 처리 추가
 - 기존 테스트가 실패하지 않도록 서비스 로직 수정
 
@@ -38,13 +38,13 @@
 
 ## ✅ Lv 4. API 로깅 기능
 
-### 🔹 1. Interceptor 기반 로깅 구현
+### 📌 1. Interceptor 기반 로깅 구현
 - `/admin/**` 경로에 대해 관리자 접근 로그 기록
 - 요청 시각, URI, Role 정보를 `INFO`, `WARN` 수준 로그로 출력
 
-### 🔹 2. 접근 권한 제어
+### 📌 2. 접근 권한 제어
 - 헤더의 `Role` 값이 `ADMIN`이 아닌 경우 `403 Forbidden` 반환
 
-### 🔹 3. 로깅 설정
+### 📌 3. 로깅 설정
 - `logback-spring.xml`에 interceptor 패키지 로그 레벨 추가
 - `application.properties`에서 로그 출력 레벨 명시
